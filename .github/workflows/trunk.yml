@@ -18,14 +18,14 @@ concurrency:
 jobs:
   parallelnative-linux-xenial-py3_7-gcc5_4-build:
     name: parallelnative-linux-xenial-py3.7-gcc5.4
-    uses: pytorch/pytorch/.github/workflows/_linux-build.yml
+    uses: .github/workflows/_linux-build.yml
     with:
       build-environment: parallelnative-linux-xenial-py3.7-gcc5.4
       docker-image-name: pytorch-linux-xenial-py3.7-gcc5.4
 
   parallelnative-linux-xenial-py3_7-gcc5_4-test:
     name: parallelnative-linux-xenial-py3.7-gcc5.4
-    uses: pytorch/pytorch/.github/workflows/_linux-test.yml
+    uses: .github/workflows/_linux-test.yml
     needs: parallelnative-linux-xenial-py3_7-gcc5_4-build
     with:
       build-environment: parallelnative-linux-xenial-py3.7-gcc5.4
