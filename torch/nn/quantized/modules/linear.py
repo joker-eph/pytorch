@@ -8,8 +8,6 @@ from torch.nn.quantized.modules.utils import _quantize_weight, hide_packed_param
 from torch.nn.utils.fusion import fuse_linear_bn_weights
 from typing import Optional
 
-from torch.nn.utils.parametrize import is_parametrized
-
 class LinearPackedParams(torch.nn.Module):
     _version = 3
 
