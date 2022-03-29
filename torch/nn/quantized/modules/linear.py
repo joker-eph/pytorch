@@ -8,6 +8,8 @@ from torch.nn.quantized.modules.utils import _quantize_weight, hide_packed_param
 from torch.nn.utils.fusion import fuse_linear_bn_weights
 from typing import Optional
 
+from torch.nn.utils.parametrize import is_parametrized
+
 class LinearPackedParams(torch.nn.Module):
     _version = 3
 
@@ -240,8 +242,9 @@ class Linear(WeightedQuantizedModule):
             mod (Module): a float module, either produced by torch.ao.quantization
                           utilities or provided by the user
         """
+        from torch.ao.quantization.utils import nonparam_type  # moving this to the top causes an import error
         if hasattr(mod, 'weight_fake_quant'):
-            if type(mod) == nniqat.LinearBn1d:
+            if nonparam_type(mod) == nniqat.LinearBn1d:
                 mod.weight, mod.bias = fuse_linear_bn_weights(
                     mod.weight, mod.bias, mod.bn.running_mean, mod.bn.running_var,
                     mod.bn.eps, mod.bn.weight, mod.bn.bias)
@@ -255,10 +258,10 @@ class Linear(WeightedQuantizedModule):
                 cls._FLOAT_MODULE = [cls._FLOAT_MODULE]  # type: ignore[assignment]
             supported_modules = ', '.join([float_mod.__name__ for float_mod in cls._FLOAT_MODULE])  # type: ignore[attr-defined]
             error_msg = 'nnq.{}.from_float only works for {}, but got: {}'.format(cls.__name__, supported_modules, type(mod))
-            assert type(mod) in cls._FLOAT_MODULE, error_msg.format()  # type: ignore[attr-defined]
+            assert nonparam_type(mod) in cls._FLOAT_MODULE, error_msg.format()  # type: ignore[attr-defined]
             assert hasattr(mod, 'qconfig'), 'Input float module must have qconfig defined'
             activation_post_process = mod.activation_post_process
-            if type(mod) == nni.LinearReLU:
+            if nonparam_type(mod) == nni.LinearReLU:
                 mod = mod[0]
             weight_post_process = mod.qconfig.weight()
         weight_post_process(mod.weight)
